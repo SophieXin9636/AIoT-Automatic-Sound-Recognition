@@ -15,6 +15,12 @@ sudo apt-get update
 sudo apt-get install ffmpeg
 ```
 
+or
+
+```shell
+sudo bash env.sh
+```
+
 ## How to convert .amr file into .wav?
 *Method 1*
 ```shell
@@ -40,4 +46,8 @@ python3 analysis1.py
 * create image
 ```shell
 python3 image_create.py
+```
+* CNN training
+```shell
+python3 mycnn.py
 ```
