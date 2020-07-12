@@ -1,53 +1,55 @@
 # Sound Analysis
+
 By Sophie Shin
 
-## install
-* python3
-	* pydub
-```shell
-sudo apt-get install python3-pip
-sudo pip3 install pydub
-sudo apt-add-repository ppa:mc3man/trusty-media
-sudo apt-get update
-```
-* ffmpeg
-```shell
+## Introduction Analysis Step
+<img src="./img/step.png">
+
+## Install the dependencies
+```sh
+pip3 install -r requirements.txt
 sudo apt-get install ffmpeg
 ```
-
 or
-
-```shell
+```sh
 sudo bash env.sh
 ```
 
-## How to convert .amr file into .wav?
-*Method 1*
-```shell
+## Usage
+
+### Convert .amr(or others) file into .wav
+*Method 1* Only Convert file extension
+```sh
 ffmpeg -i sound3.amr -ar 22050 sound3.wav
 ```
 
-*Method 2* RUN *editAudio.py* (Undone)
-```shell
-python3 editAudio.py *files*
+*Method 2* Convert file extension and edit particular seconds of Audio
+```sh
+python3 editAudio.py -r <beginSec>:<endSec> -i <inputAudioFile> -o <outputAudioFile>
+```
+Take this command as an example,
+```sh
+python3 editAudio.py -r 5:20 -i soundfile/0601/30s/sound1.wav -o s.wav
 ```
 
-## simple analysis
-* *analysis1.py*
-```shell
-python3 analysis1.py
+### Create Spectrogram by particular Fourier Transform Method
+* Create Spectrogram
+```sh
+python3 spectrogram.py -T <Transform> -i <inputAudioPath> -o <saveImagePath>
 ```
-* *analysis.py*
-```shell
-python3 analysis1.py
+Take this command as an example,
+```sh
+python3 spectrogram.py -T stft -i sound -o img
+```
+Output
+```
+Input File ：  sound/
+Output Path：  img/stft/
+
+STFT Spectrogram Has Created!
 ```
 
-## How to analysis?
-* create image
-```shell
-python3 image_create.py
-```
-* CNN training
-```shell
+### CNN Training
+```sh
 python3 mycnn.py
 ```
