@@ -1,17 +1,18 @@
 #!/usr/bin/python3
 import getopt
 import numpy as np
-import sys
+import os, sys
 from pydub import AudioSegment
 from pydub.playback import play
 
-#save_path = "./soundfile/0601/10s/"
-#num = 1
-#filename ="sound"+ str(num) +".wav"
 inputfile  = ""
-outputfile = ""
+outputfile = "test.wav"
+outputPath = "./"
 
 def split_sound(start, end):
+	global inputfile, outputfile
+	print('Input  File：', inputfile)
+	print('Output File：', outputfile)
 	# s convert into ms
 	s = start * 1000 
 	e = end * 1000
@@ -23,25 +24,47 @@ def split_sound(start, end):
 
 	# export sound
 	file_prefix = inputfile.split('.')[0]
-	##save_filename = file_prefix + "_" + str(start) + ".wav"
 	file_extension = outputfile.split('.')[1]
 	filename = outputfile.split('.')[0]
 	file = soundOut.export(outputfile, format=file_extension)
 
+def auto_create_frame():
+	global inputfile, outputPath
+	print('Input  File：', inputfile)
+	print('Output Path：', outputPath)
+
+	# inport
+	file_extension = inputfile.split('.')[1] # wav gpp ... etc
+	sound = AudioSegment.from_file(inputfile, format=file_extension)
+
+	patting_frame_range = []
+	i = 0
+	while i < int(sound.duration_seconds*1000):
+		x = sound[i].dBFS
+		if x > -15:
+			patting_frame_range.append([i-50, i+50])
+			i += 300
+		else:
+			i += 1
+	# export sound
+	for cnt, data in enumerate(patting_frame_range):
+		sound[data[0]:data[1]].export(outputPath+"frame_"+ str(cnt)+".wav", format="wav")
+
 def main(argv):
-	global inputfile
-	global outputfile
+	global inputfile, outputfile, outputPath
 	begin, end = 0, 0
+	mode = "default"
 
 	try:
-		opts, args = getopt.getopt(argv,"hi:o:r:",["ifile=","ofile=","range="])
+		opts, args = getopt.getopt(argv,"hai:o:r:p:",["help","ifile=","ofile=","range=","mode=","auto","path="])
 	except getopt.GetoptError:
 		print ('usage: python3 editAudio.py -r <begin>:<end> -i <inputAudioFile> -o <outputAudioFile>')
 		sys.exit(2)
 	else:
 		for opt, arg in opts:
-			if opt == '-h':
-				print ('usage: python3 editAudio.py -r <begin>:<end> -i <inputAudioFile> -o <outputAudioFile>')
+			if opt in ('-h', "--help"):
+				print('usage: python3 editAudio.py -r <begin>:<end> -i <inputAudioFile> -o <outputAudioFile>')
+				print('       python3 editAudio.py --auto -i <inputAudioFile> -p <outputAudioPath>')
 				sys.exit()
 			elif opt in ("-r", "--range"):
 				begin = int(arg.split(':')[0])
@@ -50,27 +73,25 @@ def main(argv):
 				inputfile = arg
 			elif opt in ("-o", "--ofile"):
 				outputfile = arg
-		print ('Input File：', inputfile)
-		print ('Output File：', outputfile)
-		split_sound(begin, end)
+			elif opt in ("-p", "--path"):
+				if arg[-1] != '/':
+					outputPath = arg + '/'
+				else:
+					outputPath = arg
+				os.makedirs(outputPath, exist_ok=True)
+			elif opt in ("-a", "--auto"):
+				mode = "auto"
+		if mode == "auto":
+			auto_create_frame()
+		else:
+			split_sound(begin, end)
 
 if( __name__ == '__main__'):
-	"""
-	duration = input("Input sound duration you want to split: ")
-	# split sound to ls
-	for no in range(1,4): # file num
-		num = no
-		filename ="sound"+ str(num) +".wav"
-		for i in range(1,int(30/duration)): # sec
-			split_sound(i, i+duration)
-	"""
-	#for num in range(1,4):
-	#	filename ="sound"+ str(num) +".wav"
-	#	split_sound(20, 30)
 	if (sys.argv.__len__()) > 1:
 		main(sys.argv[1:])
 	else:
-		print ('usage: python3 editAudio.py -r <begin>:<end> -i <inputAudioFile> -o <outputAudioFile>')
+		print('usage: python3 editAudio.py -r <begin>:<end> -i <inputAudioFile> -o <outputAudioFile>')
+		print('       python3 editAudio.py -a -i <inputAudioFile> -p <outputAudioPath>')
 
 # Reference
 # https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/365411/

@@ -11,7 +11,7 @@ method = "stft"
 intput_audio_path = './sound/'
 save_image_path = './img/'
 output_extension = ".png"
-my_dpi = 120
+my_dpi = 48
 y, srsr = None, None
 fig = None
 
@@ -40,16 +40,9 @@ def analysis_all(file):
 	plt.clf()
 
 	## stft
-	D = librosa.amplitude_to_db(librosa.stft(y), ref=np.max)
+	D = librosa.amplitude_to_db(np.abs(librosa.stft(y)), ref=np.max)
 	librosa.display.specshow(D)
 	fig.savefig(save_path + "stft/"+ savefile)
-	plt.clf()
-
-	## stft abs
-	X1 = librosa.stft(y)
-	Xdb1 = librosa.amplitude_to_db(abs(X1))
-	librosa.display.specshow(Xdb1)
-	fig.savefig(save_path + "stft_abs/"+ savefile)
 	plt.close('all')
 
 def analysis_mfcc():
@@ -71,13 +64,6 @@ def analysis_cqt():
 	cqt_data = librosa.cqt(y, sr=sr)
 	CQT1 = librosa.amplitude_to_db(cqt_data, ref=np.max)
 	librosa.display.specshow(CQT1)
-
-def analysis_stft():
-	global y, sr
-
-	stft_data = librosa.stft(y)
-	D = librosa.amplitude_to_db(stft_data, ref=np.max)
-	librosa.display.specshow(D)
 
 def analysis_stft_abs():
 	global y, sr
@@ -132,11 +118,11 @@ def main(argv):
 				else:
 					intput_audio_path = arg+'/'
 			elif opt in ("-o", "--outpath"):
-				save_image_path = arg+'/'+ method + '/'
-				if not os.path.exists(arg):
-					os.mkdir(arg)
-				elif not os.path.exists(save_image_path):
-					os.mkdir(save_image_path)
+				if arg[-1] != '/':
+					save_image_path = arg + '/'
+				else:
+					save_image_path	+= arg + method + '/'
+				os.makedirs(save_image_path, exist_ok=True)
 		print('Input File ： ', intput_audio_path)
 		print('Output Path： ', save_image_path)
 		call_Transform(method)
