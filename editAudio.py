@@ -43,7 +43,7 @@ def auto_create_frame():
 		x = sound[i].dBFS
 		if x > -15:
 			patting_frame_range.append([i-50, i+50])
-			i += 300
+			i += 200
 		else:
 			i += 1
 	# export sound
@@ -92,6 +92,3 @@ if( __name__ == '__main__'):
 	else:
 		print('usage: python3 editAudio.py -r <begin>:<end> -i <inputAudioFile> -o <outputAudioFile>')
 		print('       python3 editAudio.py -a -i <inputAudioFile> -p <outputAudioPath>')
-
-# Reference
-# https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/365411/

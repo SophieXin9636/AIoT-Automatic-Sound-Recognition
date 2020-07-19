@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 from PIL import Image
 import os, sys, getopt
 
-dict_labels = {"incorrect":0, "correct":1}
+label_dict = {"incorrect":0, "correct":1}
 
 input_img_path = "/content/drive/My Drive/Colab Notebooks/soundAnalysis/img/"
 correct_img_path = "/content/drive/My Drive/Colab Notebooks/soundAnalysis/img/correct/"
@@ -19,6 +19,9 @@ incorrect_np_path = ""
 
 def save_data_npy(imgPath, npPath, file_arr):
     # Load Image, and save to npy
+    if( len(os.listdir(imgPath))-1 == len(os.listdir(npPath))):
+        return;
+
     for i, filename in enumerate(file_arr):
         file = imgPath + filename
         if os.path.isdir(file):
@@ -31,7 +34,7 @@ def show_train_history(train_history, train, validation):
     plt.plot(train_history.history[train])  
     plt.plot(train_history.history[validation]) # validation : test
     plt.title('Train History')  
-    plt.ylabel('Accuracy')  
+    plt.ylabel(train)  
     plt.xlabel('Epoch')  
     plt.legend(['train', 'validation'], loc='upper left')  
     plt.show() 
@@ -46,28 +49,29 @@ def cnn():
     X = np.load(correct_np_path + correct_labels[0])
     cnn_shape = X.shape[1:]
     y = np.zeros(X.shape[0])
-    y[0] = dict_labels["correct"]
+    y[0] = label_dict["correct"]
 
     # Append all of the correct dataset into one single array, same goes for y
     for i, label in enumerate(correct_labels[1:]):
         x = np.load(correct_np_path + label)
         X = np.vstack((X, x))
-        y = np.append(y, np.full(x.shape[0], fill_value=dict_labels["correct"]))
+        y = np.append(y, np.full(x.shape[0], fill_value=label_dict["correct"]))
     assert X.shape[0] == len(y)
 
     incorrect_labels = os.listdir(incorrect_img_path)
     save_data_npy(incorrect_img_path, incorrect_np_path, incorrect_labels)
     incorrect_labels = os.listdir(incorrect_np_path)
+
     # Append all of the incorrect dataset into one single array, same goes for y
     for i, label in enumerate(incorrect_labels):
         x = np.load(incorrect_np_path + label)
         X = np.vstack((X, x))
-        y = np.append(y, np.full(x.shape[0], fill_value=dict_labels["incorrect"]))
+        y = np.append(y, np.full(x.shape[0], fill_value=label_dict["incorrect"]))
     print(X.shape[0], len(y))
     assert X.shape[0] == len(y)
 
     # loading data
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size= (1 - 0.6), random_state=48, shuffle=True)
+    X_train, X_test, y_label_train, y_label_test = train_test_split(X, y, test_size= (1 - 0.6), random_state=48, shuffle=True)
     #X_train = X_train.reshape(X_train.shape[0], x.shape[0], x.shape[1], x.shape[2])
     #X_test = X_test.reshape(X_test.shape[0], x.shape[0], x.shape[1], x.shape[2])
 
@@ -76,15 +80,23 @@ def cnn():
     X_test_normalize = X_test / 255
 
     # one-hot encoding
-    y_train_hot = to_categorical(y_train)
-    y_test_hot  = to_categorical(y_test)
+    y_label_train_hot = to_categorical(y_label_train)
+    y_label_test_hot  = to_categorical(y_label_test)
 
     # create Sequential model
     model = Sequential()
-    model.add(Conv2D(filters=16, kernel_size=(5, 5), padding='same', input_shape = cnn_shape, activation='relu'))
+
+    model.add(Conv2D(filters=16, 
+                     kernel_size=(5, 5), 
+                     padding='same', 
+                     input_shape = cnn_shape, 
+                     activation='relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
-    model.add(Conv2D(filters=36, kernel_size=(5, 5), padding='same', activation='relu'))
+    model.add(Conv2D(filters=36, 
+                     kernel_size=(5, 5), 
+                     padding='same', 
+                     activation='relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Dropout(0.25))
 
@@ -95,7 +107,7 @@ def cnn():
     model.add(Dense(128, activation='relu'))
     model.add(Dropout(0.5))
 
-    # Add output layer
+    # Output layer
     model.add(Dense(2, activation='softmax'))
 
     print(model.summary())
@@ -105,17 +117,17 @@ def cnn():
                   optimizer=keras.optimizers.Adadelta(),
                   metrics=['accuracy'])
     # training
-    train_history = model.fit(X_train_normalize, y_train_hot, 
-                              batch_size=10, 
-                              epochs=100, 
+    train_history = model.fit(X_train_normalize, y_label_train_hot, 
+                              batch_size=20, 
+                              epochs=10, 
                               verbose=1, 
-                              validation_data=(X_test_normalize, y_test_hot))
+                              validation_data=(X_test_normalize, y_label_test_hot))
 
     # save model
     model.save('ASR.h5')  # creates a HDF5 file 'model.h5'
 
     # Display loss function, training result
-    score = model.evaluate(X_test_normalize, y_test_hot, verbose=1)
+    score = model.evaluate(X_test_normalize, y_label_test_hot, verbose=1)
     print('Test loss:', score[0])
     print('Test accuracy:', score[1])
 
@@ -131,12 +143,12 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "dhi:", ["inpath="])
     except getopt.GetoptError:
-        print('usage: python3 cnn.py -i <inputImagePath>')
+        print('usage: python3 cnn.py -i <inputImageBasePath>')
         sys.exit(2)
     else:
         for opt, arg in opts:
             if opt == '-h':
-                print('usage: python3 cnn.py -i <inputImagePath>')
+                print('usage: python3 cnn.py -i <inputImageBasePath>')
                 sys.exit()
             elif opt == '-d':
                 break
@@ -145,13 +157,13 @@ def main(argv):
                     input_img_path = arg + '/'
                 else:
                     input_img_path = arg
-        correct_img_path = input_img_path + "correct/"
+        correct_img_path = input_img_path + "correct/img/"
         correct_np_path = correct_img_path + "np/"
-        incorrect_img_path = input_img_path + "incorrect/"
+        incorrect_img_path = input_img_path + "incorrect/img/"
         incorrect_np_path = incorrect_img_path + "np/"
         os.makedirs(correct_np_path, exist_ok=True)
         os.makedirs(incorrect_np_path, exist_ok=True)
-        print('Input Correct Data Path： ', correct_img_path)
+        print('\nInput Correct Data Path： ', correct_img_path)
         print('Numpy Data Save Path: ', correct_np_path)
         print('Input Incorrect Data Path： ', incorrect_img_path)
         print('Numpy Data Save Path: ', incorrect_np_path)
@@ -162,4 +174,4 @@ if( __name__ == '__main__'):
     if (sys.argv.__len__()) > 1:
         main(sys.argv[1:])
     else:
-        print('usage: python3 cnn.py -i <inputImagePath>')
+        print('usage: python3 cnn.py -i <inputImageBasePath>')

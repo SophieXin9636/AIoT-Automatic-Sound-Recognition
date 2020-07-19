@@ -80,6 +80,8 @@ def call_Transform(method):
 	fig = plt.figure(dpi=my_dpi, figsize=(4,3))
 
 	for file in audio_files:
+		if os.path.isdir(file):
+			continue
 		y, sr = librosa.load(intput_audio_path + file, sr=None)
 		
 		if method == "mfcc":
@@ -113,17 +115,19 @@ def main(argv):
 			elif opt in ("-T", "--method"):
 				method = arg
 			elif opt in ("-i", "--inpath"):
+				if arg[-1] != '/':
+					intput_audio_path = arg + '/'
+				else:
+					intput_audio_path = arg
 				if os.path.exists(arg) == False:
 					os.makedirs(arg)
-				else:
-					intput_audio_path = arg+'/'
 			elif opt in ("-o", "--outpath"):
 				if arg[-1] != '/':
 					save_image_path = arg + '/'
 				else:
 					save_image_path	+= arg + method + '/'
 				os.makedirs(save_image_path, exist_ok=True)
-		print('Input File ： ', intput_audio_path)
+		print('Input  File： ', intput_audio_path)
 		print('Output Path： ', save_image_path)
 		call_Transform(method)
 		print("\n"+ method.upper() + " Spectrogram Has Created!")
