@@ -1,21 +1,18 @@
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import numpy as np
-import keras.losses  
+import keras.losses
+import os, sys, getopt 
 from keras.models import Sequential, load_model
 from keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D
 from keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
 from PIL import Image
-import os, sys, getopt
 
 label_dict = {"incorrect":0, "correct":1}
 
-input_img_path = "/content/drive/My Drive/Colab Notebooks/soundAnalysis/img/"
-correct_img_path = "/content/drive/My Drive/Colab Notebooks/soundAnalysis/img/correct/"
-correct_np_path = ""
-incorrect_img_path = "/content/drive/My Drive/Colab Notebooks/soundAnalysis/img/incorrect/"
-incorrect_np_path = ""
+input_img_path = "./real_training_data/correct/img"
+correct_np_path = "./real_training_data/incorrect/img/np"
 
 def save_data_npy(imgPath, npPath, file_arr):
     # Load Image, and save to npy
@@ -41,8 +38,8 @@ def show_train_history(train_history, train, validation):
 
 def cnn():
     # Get available labels
-    correct_labels = os.listdir(correct_img_path)
-    save_data_npy(correct_img_path, correct_np_path, correct_labels)
+    correct_labels = os.listdir(input_img_path)
+    save_data_npy(input_img_path, correct_np_path, correct_labels)
     correct_labels = os.listdir(correct_np_path)
 
     # Getting first arrays
@@ -56,18 +53,6 @@ def cnn():
         x = np.load(correct_np_path + label)
         X = np.vstack((X, x))
         y = np.append(y, np.full(x.shape[0], fill_value=label_dict["correct"]))
-    assert X.shape[0] == len(y)
-
-    incorrect_labels = os.listdir(incorrect_img_path)
-    save_data_npy(incorrect_img_path, incorrect_np_path, incorrect_labels)
-    incorrect_labels = os.listdir(incorrect_np_path)
-
-    # Append all of the incorrect dataset into one single array, same goes for y
-    for i, label in enumerate(incorrect_labels):
-        x = np.load(incorrect_np_path + label)
-        X = np.vstack((X, x))
-        y = np.append(y, np.full(x.shape[0], fill_value=label_dict["incorrect"]))
-    print(X.shape[0], len(y))
     assert X.shape[0] == len(y)
 
     # loading data
@@ -138,7 +123,6 @@ def cnn():
 def main(argv):
     global input_img_path
     global correct_img_path, correct_np_path
-    global incorrect_img_path, incorrect_np_path
 
     try:
         opts, args = getopt.getopt(argv, "dhi:", ["inpath="])
@@ -157,16 +141,10 @@ def main(argv):
                     input_img_path = arg + '/'
                 else:
                     input_img_path = arg
-        correct_img_path = input_img_path + "correct/img/"
-        correct_np_path = correct_img_path + "np/"
-        incorrect_img_path = input_img_path + "incorrect/img/"
-        incorrect_np_path = incorrect_img_path + "np/"
+        correct_np_path = input_img_path + "np/"
         os.makedirs(correct_np_path, exist_ok=True)
-        os.makedirs(incorrect_np_path, exist_ok=True)
-        print('\nInput Correct Data Path： ', correct_img_path)
+        print('\nInput Data Path： ', input_img_path)
         print('Numpy Data Save Path: ', correct_np_path)
-        print('Input Incorrect Data Path： ', incorrect_img_path)
-        print('Numpy Data Save Path: ', incorrect_np_path)
         cnn()
         print("\nCNN Training Has Done!\n")
 

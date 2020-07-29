@@ -1,9 +1,7 @@
 #!/usr/bin/python3
-import getopt
+import os, sys, getopt
 import numpy as np
-import os, sys
 from pydub import AudioSegment
-from pydub.playback import play
 
 inputfile  = ""
 outputfile = "test.wav"
@@ -42,13 +40,21 @@ def auto_create_frame():
 	while i < int(sound.duration_seconds*1000):
 		x = sound[i].dBFS
 		if x > -15:
-			patting_frame_range.append([i-50, i+50])
-			i += 200
+			patting_frame_range.append([i-24, i+40])
+			i += 150
 		else:
 			i += 1
 	# export sound
+	num_of_file = 0
+	files = os.listdir(outputPath)
+	print(len(files))
+	for f in files:
+		if os.path.isfile(outputPath+f):
+			num_of_file += 1
 	for cnt, data in enumerate(patting_frame_range):
-		sound[data[0]:data[1]].export(outputPath+"frame_"+ str(cnt)+".wav", format="wav")
+		sound[data[0]:data[1]].export(outputPath+"frame_"+ str(cnt+num_of_file)+".wav", format="wav")
+	print("Totally create" , cnt+1, "wave files!")
+	print("Output Path：[", outputPath, "] has", len(os.listdir(outputPath)), "wave files")
 
 def main(argv):
 	global inputfile, outputfile, outputPath

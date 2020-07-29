@@ -77,12 +77,13 @@ def call_Transform(method):
 	global output_extension, fig, y, sr
 
 	audio_files = os.listdir(intput_audio_path)
-	fig = plt.figure(dpi=my_dpi, figsize=(4,3))
+	fig = plt.figure(dpi=my_dpi, figsize=(4,6))
 
 	for file in audio_files:
-		if os.path.isdir(file):
+		filename = intput_audio_path + file
+		if os.path.isdir(filename):
 			continue
-		y, sr = librosa.load(intput_audio_path + file, sr=None)
+		y, sr = librosa.load(filename, sr=None)
 		
 		if method == "mfcc":
 			analysis_mfcc_normal()
@@ -94,7 +95,7 @@ def call_Transform(method):
 			analysis_all(file)
 			continue
 
-		fig.savefig(save_image_path + file.split('.')[0] + output_extension)
+		fig.savefig(save_image_path + file.split('.')[0] + output_extension, dpi=my_dpi)
 		plt.clf()
 
 	plt.close('all')
@@ -125,7 +126,7 @@ def main(argv):
 				if arg[-1] != '/':
 					save_image_path = arg + '/'
 				else:
-					save_image_path	+= arg + method + '/'
+					save_image_path	= arg + method + '/'
 				os.makedirs(save_image_path, exist_ok=True)
 		print('Input  File： ', intput_audio_path)
 		print('Output Path： ', save_image_path)

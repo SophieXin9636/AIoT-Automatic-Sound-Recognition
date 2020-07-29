@@ -36,12 +36,12 @@ python3 editAudio.py -r 5:20 -i soundfile/0601/30s/sound1.wav -o s.wav
 It will split frames automatically when it detects the sound. <br>
 Detection standard: dBFS > -15 (max dBFS is 0), and trim sound interval = [sec-50, sec+50]
 ```sh
-python3 editAudio.py -a -i <inputAudioFile> -o <outputAudioPath>
+python3 editAudio.py -a -i <inputAudioFile> -p <outputAudioPath>
 ```
 
 Take this command as an example,
 ```sh
-python3 editAudio.py -a -i soundfile/0601/30s/sound1.wav -p soundfile/0601/frame
+python3 editAudio.py -a -i soundfile/0715_pat_correct.wav -p real_training_data/correct
 ```
 
 ## Step2. Create Spectrogram by particular Fourier Transform Method
@@ -51,7 +51,8 @@ python3 spectrogram.py -T <Transform> -i <inputAudioPath> -o <saveImagePath>
 ```
 Take this command as an example,
 ```sh
-python3 spectrogram.py -T stft -i soundfile/0601/frame -o img/correct
+python3 spectrogram.py -T stft -i real_training_data/correct/ -o real_training_data/correct/img
+python3 spectrogram.py -T stft -i real_training_data/incorrect/ -o real_training_data/incorrect/img
 ```
 Output
 ```
@@ -68,4 +69,15 @@ python3 cnn.py -i <inputImageBasePath>
 Take this command as an example,
 ```sh
 python3 cnn.py -i ./real_training_data/
+```
+
+## Others
+
+### wave plot
+```sh
+usage: python3 wave_plot.py -r <begin>:<end> -i <inputAudioFile> -o <outputAudioFile>
+```
+Take this command as an example,
+```
+python3 wave_plot.py -r 1:5 -i sound_data/0727_record/1.wav -o example.png
 ```
