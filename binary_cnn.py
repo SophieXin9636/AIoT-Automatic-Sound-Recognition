@@ -39,6 +39,7 @@ def show_train_history(train_history, train, validation):
     plt.xlabel('Epoch')  
     plt.legend(['train', 'validation'], loc='upper left')  
     plt.show()
+    plt.savefig(train+".png" ,bbox_inches='tight')
 
 def cnn():
     # Get Correct labels
@@ -62,7 +63,7 @@ def cnn():
     save_data_npy(incorrect_img_path, incorrect_np_path)
     incorrect_labels = os.listdir(incorrect_np_path)
 
-    # Append all of the correct dataset into one single array, same goes for y
+    # Append all of the incorrect dataset into one single array, same goes for y
     for i, label in enumerate(incorrect_labels):
         x = np.load(incorrect_np_path + label)
         X = np.vstack((X, x))
@@ -115,8 +116,8 @@ def cnn():
                   metrics=['accuracy'])
     # training
     train_history = model.fit(X_train_normalize, y_label_train_hot, 
-                              batch_size=20, 
-                              epochs=10, 
+                              batch_size=40, 
+                              epochs=20, 
                               verbose=1, 
                               validation_data=(X_test_normalize, y_label_test_hot))
 
@@ -160,10 +161,10 @@ def main(argv):
         incorrect_np_path = incorrect_img_path + "np/"
         os.makedirs(correct_np_path, exist_ok=True)
         os.makedirs(incorrect_np_path, exist_ok=True)
-        print('\nInput Correct   Data Path： ', correct_img_path)
-        print('Input Incorrect Data Path： ', incorrect_np_path)
-        print('Numpy Correct   Data Save Path: ', correct_np_path)
-        print('Numpy Incorrect Data Save Path: ', incorrect_np_path)
+        print('\nInput Correct   Data Path: ', correct_img_path)
+        print('Input Incorrect Data Path: ', incorrect_np_path)
+        print('Numpy Correct   Data Path: ', correct_np_path)
+        print('Numpy Incorrect Data Path: ', incorrect_np_path)
         cnn()
         print("\nCNN Training Has Done!\n")
 
