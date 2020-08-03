@@ -13,21 +13,17 @@ label_dict = {"incorrect":0, "correct":1}
 # open wave file (assume it is 64 ms frame)
 my_dpi = 24
 x_test = None
-y_test_label = None
+y_test_label = []
 input_label = "correct" # default
+correct_path = ""
+incorrect_path = ""
 
-def sound_recognition(file_or_path):
-	global x_test, y_test_label
-	add_img_data_into_validation_set(file_or_path)
-
-	# add data (one hot encoding shape[1] is 2)
-	"""
-	a = np.array(Image.open(file_or_path+"correct.png").convert('RGB'))
-	a = np.expand_dims(a, axis=0)
-	x_test = np.vstack((x_test, a))
-	y_test_label = np.append(y_test_label, np.full(a.shape[0], fill_value=label_dict["correct"]))
-	"""
-
+def sound_recognition():
+	global x_test, y_test_label, correct_path, incorrect_path
+	add_img_data_into_validation_set(correct_path, "correct")
+	add_img_data_into_validation_set(incorrect_path, "incorrect")
+	
+	x_test = x_test / 255 # normalize
 	y_test_label_hot = to_categorical(y_test_label)
 
 	print(x_test.shape) # (379, 116, 80, 3)
@@ -40,12 +36,12 @@ def sound_recognition(file_or_path):
 	score = model.evaluate(x_test, y_test_label_hot, verbose=0)
 	# Output result
 	print('\nTest loss:', score[0])
-	print('Test accuracy:', score[1])
+	print('Test accuracy:', score[1], end="\n\n")
 
 	# show confusion matrix
 	print(pd.crosstab(y_test_label, prediction, rownames=['label'], colnames=['predict']))
 
-def add_img_data_into_validation_set(file_or_path):
+def add_img_data_into_validation_set(file_or_path, label):
 	global x_test, y_test_label
 
 	file_list = []
@@ -82,17 +78,17 @@ def add_img_data_into_validation_set(file_or_path):
 			plt.clf()
 
 			# Load Image data, shape = (116,80,3)
-			if file_num != 1:
-				if i == 0:
-					X = np.array(Image.open(input_path+"test.png").convert('RGB'))
-					X = np.expand_dims(X, axis=0)
-					y_test_label = np.zeros(X.shape[0])
-					y_test_label[0] = label_dict[input_label]
-				else:
+			if file_num > 1:
+				if len(y_test_label) == 0:
 					x_test = np.array(Image.open(input_path+"test.png").convert('RGB'))
 					x_test = np.expand_dims(x_test, axis=0)
-					X = np.vstack((X, x_test))
-					y_test_label = np.append(y_test_label, np.full(x_test.shape[0], fill_value=label_dict[input_label]))
+					y_test_label = np.zeros(x_test.shape[0])
+					y_test_label[0] = label_dict[input_label]
+				else:
+					data = np.array(Image.open(input_path+"test.png").convert('RGB'))
+					data = np.expand_dims(data, axis=0)
+					x_test = np.vstack((x_test, data))
+					y_test_label = np.append(y_test_label, np.full(data.shape[0], fill_value=label_dict[label]))
 			else:
 				x_test = np.array(Image.open(input_path+"test.png").convert('RGB'))
 				x_test = np.expand_dims(x_test, axis=0)
@@ -103,40 +99,40 @@ def add_img_data_into_validation_set(file_or_path):
 			print("This is not standard frame (not 64ms)!\n")
 	
 	if file_num > 1:
-		assert X.shape[0] == len(y_test_label)
-		x_test = X
-
-	x_test = x_test / 255 # normalize
+		assert x_test.shape[0] == len(y_test_label)
 
 def main(argv):
-	global input_label
+	global correct_path, incorrect_path
 
 	try:
-		opts, args = getopt.getopt(argv, "hi:p:", ["file=","path=","label="])
+		opts, args = getopt.getopt(argv, "hi:p:", ["file=","path0=","path1="])
 	except getopt.GetoptError:
 		print('usage: python3 validation.py -i <AudioFile>')
-		print('python3 test.py -p <inputAudioFile> --label <label>')
+		print('usage: python3 test.py --path0 <IncorrectAudioPath> --path1 <CorrectAudioPath>')
 		sys.exit(2)
 	else:
 		for opt, arg in opts:
 			if opt == '-h':
 				print('usage: python3 validation.py -i <AudioFile>')
-				print('python3 test.py -p <inputAudioFile> --label <label>')
+				print('usage: python3 test.py --path0 <IncorrectAudioPath> --path1 <CorrectAudioPath>')
 				sys.exit()
-			elif opt == "--label":
-				input_label = arg
 			elif opt in ("-i", "--file"):
 				file_or_path = arg
 				print('\nInput  File: ', file_or_path)
-			elif opt in ("-p", "--path"):
+			elif opt == "--path0":
 				if arg[-1] != '/':
-					file_or_path = arg + '/'
+					incorrect_path = arg + '/'
 				else:
-					file_or_path = arg
-				print('Input Path: ', file_or_path)
+					incorrect_path = arg
+			elif opt == "--path1":
+				if arg[-1] != '/':
+					correct_path = arg + '/'
+				else:
+					correct_path = arg
 
-		print("Input label: ", input_label, end="\n\n")
-		sound_recognition(file_or_path)
+		print("Input  Correct Path: ", correct_path)
+		print("Input Inorrect Path: ", incorrect_path, end="\n\n")
+		sound_recognition()
 		print('\nSound Validation has Done!')
 
 if __name__ == '__main__':
@@ -144,4 +140,4 @@ if __name__ == '__main__':
 		main(sys.argv[1:])
 	else:
 		print('usage: python3 validation.py -i <AudioFile>')
-		print('python3 test.py -p <inputAudioFile> --label <label>')
+		print('usage: python3 test.py --path0 <IncorrectAudioPath> --path1 <CorrectAudioPath>')
