@@ -1,4 +1,6 @@
 import os, sys, getopt
+import librosa
+import librosa.display
 import numpy as np
 import matplotlib.pyplot as plt
 from pydub import AudioSegment
@@ -31,6 +33,13 @@ def create_wave_pic(start, end):
 	plt.plot(t,amp)
 	plt.show()
 	fig.savefig(outputfile)
+	plt.close('all')
+
+def wave_plot():
+	global inputfile, outputfile
+	y, sr = librosa.load(inputfile, duration=10)
+	fig = plt.figure()
+	librosa.display.waveplot(y, sr=sr)
 	plt.close('all')
 
 def main(argv):

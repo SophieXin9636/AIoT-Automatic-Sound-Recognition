@@ -11,8 +11,9 @@ method = "stft"
 intput_audio_path = './sound/'
 save_image_path = './img/'
 output_extension = ".png"
-my_dpi = 48
-y, srsr = None, None
+my_dpi = 24
+figsize = (4,6)
+y, sr = None, None
 fig = None
 
 def analysis_all(file):
@@ -23,26 +24,29 @@ def analysis_all(file):
 	"""
 	mfccs_data = librosa.feature.mfcc(y, sr=sr)
 	librosa.display.specshow(mfccs_data, sr=sr)
-	fig.savefig(save_path + "mfcc/"+ savefile)
+	fig.savefig(save_image_path + "mfcc/"+ savefile, dpi=my_dpi, bbox_inches='tight')
 	plt.clf()
 	"""
 	# MFCC feature normalization
 	mfccs_data = librosa.feature.mfcc(y, sr=sr)
 	mfccs1 = sklearn.preprocessing.scale(mfccs_data, axis=1) 
 	librosa.display.specshow(mfccs1, sr=sr)
-	fig.savefig(save_path + "mfcc_normal/"+ savefile)
+	os.makedirs(save_image_path + "mfcc_normal/", exist_ok=True)
+	fig.savefig(save_image_path + "mfcc_normal/"+ savefile, dpi=my_dpi, bbox_inches='tight')
 	plt.clf()
 
 	# CQT
 	CQT1 = librosa.amplitude_to_db(librosa.cqt(y, sr=sr), ref=np.max)
 	librosa.display.specshow(CQT1)
-	fig.savefig(save_path + 'cqt/'+ str(num)+"_"+str(sec) +'.png')
+	os.makedirs(save_image_path + "cqt/", exist_ok=True)
+	fig.savefig(save_image_path + "cqt/"+ savefile, dpi=my_dpi, bbox_inches='tight')
 	plt.clf()
 
 	## stft
 	D = librosa.amplitude_to_db(np.abs(librosa.stft(y)), ref=np.max)
 	librosa.display.specshow(D)
-	fig.savefig(save_path + "stft/"+ savefile)
+	os.makedirs(save_image_path + "stft/", exist_ok=True)
+	fig.savefig(save_image_path + "stft/"+ savefile, dpi=my_dpi, bbox_inches='tight')
 	plt.close('all')
 
 def analysis_mfcc():
@@ -77,7 +81,7 @@ def call_Transform(method):
 	global output_extension, fig, y, sr
 
 	audio_files = os.listdir(intput_audio_path)
-	fig = plt.figure(dpi=my_dpi, figsize=(4,6))
+	fig = plt.figure(dpi=my_dpi, figsize=figsize, frameon=False)
 
 	for file in audio_files:
 		filename = intput_audio_path + file
@@ -95,7 +99,7 @@ def call_Transform(method):
 			analysis_all(file)
 			continue
 
-		fig.savefig(save_image_path + file.split('.')[0] + output_extension, dpi=my_dpi)
+		fig.savefig(save_image_path + file.split('.')[0] + output_extension, dpi=my_dpi, bbox_inches='tight')
 		plt.clf()
 
 	plt.close('all')
@@ -124,9 +128,9 @@ def main(argv):
 					os.makedirs(arg)
 			elif opt in ("-o", "--outpath"):
 				if arg[-1] != '/':
-					save_image_path = arg + '/'
+					save_image_path = arg + '/img/' + method + '/'
 				else:
-					save_image_path	= arg + method + '/'
+					save_image_path	= arg + 'img/' + method + '/'
 				os.makedirs(save_image_path, exist_ok=True)
 		print('Input  File： ', intput_audio_path)
 		print('Output Path： ', save_image_path)
