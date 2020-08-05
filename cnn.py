@@ -104,7 +104,7 @@ def cnn():
     # training
     train_history = model.fit(X_train_normalize, y_label_train_hot, 
                               batch_size=20, 
-                              epochs=10, 
+                              epochs=2, 
                               verbose=1, 
                               validation_data=(X_test_normalize, y_label_test_hot))
 

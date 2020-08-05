@@ -32,6 +32,7 @@ def save_data_npy(imgPath, npPath):
         np.save(npPath + str(i), img_data)
 
 def show_train_history(train_history, train, validation):  
+    fig = plt.figure()
     plt.plot(train_history.history[train])  
     plt.plot(train_history.history[validation]) # validation : test
     plt.title('Train History')  
@@ -39,7 +40,7 @@ def show_train_history(train_history, train, validation):
     plt.xlabel('Epoch')  
     plt.legend(['train', 'validation'], loc='upper left')  
     plt.show()
-    plt.savefig(train+".png" ,bbox_inches='tight')
+    fig.savefig(train+".png" ,bbox_inches='tight')
 
 def cnn():
     # Get Correct labels
