@@ -51,7 +51,7 @@ python3 spectrogram.py -T <Transform> -i <inputAudioPath> -o <saveImagePath>
 ```
 Take this command as an example,
 ```sh
-python3 spectrogram.py -T stft -i real_training_data/correct/ -o real_training_data/correct/img
+python3 spectrogram.py -T stft -i 0727_data/testing/ -o 0727_data/testing/
 python3 spectrogram.py -T stft -i real_training_data/incorrect/ -o real_training_data/incorrect/img
 ```
 Output
@@ -64,16 +64,49 @@ STFT Spectrogram Has Created!
 
 ## Step3. CNN Training
 ```sh
-python3 cnn.py -i <inputImageBasePath>
+python3 cnn.py -i <CorrectImagePath> <InCorrectImagePath>
 ```
 Take this command as an example,
 ```sh
 python3 cnn.py -i ./real_training_data/
 ```
 
+or Binary Classification
+```sh
+usage: python3 binary_cnn.py --correct <CorrectImagePath> --incorrect <CorrectImagePath>
+```
+Example
+```sh
+python3 binary_cnn.py --correct 0727_data/training/img/stft/ --incorrect 0727_data/incorrect/img/stft/
+```
+
+### Step4. Validation
+Validate a Audio file
+```sh
+usage: python3 validation.py -i <AudioFile>
+```
+Take this command as an example,
+```sh
+python3 validation.py -i ./0727_data/testing/frame_0.wav
+```
+
+or Validate numerous Audio files 
+```sh
+usage: python3 test.py --path0 <IncorrectAudioPath> --path1 <CorrectAudioPath>
+```
+Take this command as an example,
+```sh
+python3 validation.py --path0 ./0727_data/incorrect/ --path1 ./0727_data/validation/
+```
+
 ## Others
 
-### wave plot
+## Step0 to Step4
+```sh
+$ bash run.sh
+```
+
+### Wave plot
 ```sh
 usage: python3 wave_plot.py -r <begin>:<end> -i <inputAudioFile> -o <outputAudioFile>
 ```
