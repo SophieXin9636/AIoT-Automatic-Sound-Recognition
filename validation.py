@@ -70,7 +70,7 @@ def add_img_data_into_validation_set(file_or_path, label):
 		sound = AudioSegment.from_file(f)
 		if len(sound) == 64:
 			# create spectrogram (wave to STFT)
-			y, sr = librosa.load(f, sr=None)
+			y, sr = librosa.load(f, sr=16000)
 			stft_data = librosa.stft(y)
 			Xdb1 = librosa.amplitude_to_db(abs(stft_data))
 			librosa.display.specshow(Xdb1)

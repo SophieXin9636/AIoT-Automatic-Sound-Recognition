@@ -13,7 +13,7 @@ save_image_path = './img/'
 output_extension = ".png"
 my_dpi = 24
 figsize = (4,6)
-y, sr = None, None
+y, sr = None, 16000
 fig = None
 
 def analysis_all(file):
@@ -72,7 +72,7 @@ def analysis_cqt():
 def analysis_stft_abs():
 	global y, sr
 
-	stft_data = librosa.stft(y)
+	stft_data = librosa.stft(y, n_fft=1024)
 	Xdb1 = librosa.amplitude_to_db(abs(stft_data))
 	librosa.display.specshow(Xdb1)
 
@@ -85,9 +85,9 @@ def call_Transform(method):
 
 	for file in audio_files:
 		filename = intput_audio_path + file
-		if os.path.isdir(filename):
+		if os.path.isdir(filename) or file.split('.')[1] != "wav":
 			continue
-		y, sr = librosa.load(filename, sr=None)
+		y, sr = librosa.load(filename, sr=16000) # sr: sample rate / sample frequency
 		
 		if method == "mfcc":
 			analysis_mfcc_normal()
