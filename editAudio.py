@@ -37,6 +37,7 @@ def auto_create_frame():
 
 	patting_frame_range = []
 	i = 0
+	# large volume percussion
 	while i < int(sound.duration_seconds*1000):
 		x = sound[i].dBFS
 		if x > -15:
@@ -44,6 +45,27 @@ def auto_create_frame():
 			i += 150
 		else:
 			i += 1
+
+	# tiny strenth percussion (small volume)
+	i = 0
+	frame_idx = 0
+	small_dB_frame_range = []
+	while i < int(sound.duration_seconds*1000):
+		x = sound[i].dBFS
+		if frame_idx < len(patting_frame_range):
+			start, end = patting_frame_range[frame_idx]
+		if start <= i <= end:
+			i = end + 1
+			frame_idx += 1
+		elif x > -30:
+			if not (start <= i+40 <= end or start <= i-24 <= end):	
+				small_dB_frame_range.append([i-24, i+40])
+			i += 150
+		else:
+			i += 1
+	
+	patting_frame_range = patting_frame_range + small_dB_frame_range
+
 	# export sound
 	num_of_file = 0
 	files = os.listdir(outputPath)
