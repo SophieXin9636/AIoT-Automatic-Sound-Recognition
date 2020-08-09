@@ -27,7 +27,14 @@ plt.show()
 fig.savefig('./img/stft.png')
 
 """
-y, sr = librosa.load("0727_data/training/frame_230.wav", sr=16000)
-librosa.display.specshow(librosa.amplitude_to_db(abs(librosa.stft(y, n_fft=1024))), x_axis='time', y_axis='linear'); plt.colorbar(format='%+2.0f dB')
+plt.rcParams.update({'font.size': 17})
+plt.subplot(1,2,1)
+y, sr = librosa.load("combine_data/incorrect/frame_100.wav", sr=20480)
+librosa.display.specshow(librosa.amplitude_to_db(abs(librosa.stft(y, n_fft=4096))), x_axis='frames', y_axis='linear')
+plt.colorbar(format='%+2.0f dB')
+plt.subplot(1,2,2)
+y, sr = librosa.load("combine_data/correct/frame_100.wav", sr=20480)
+librosa.display.specshow(librosa.amplitude_to_db(abs(librosa.stft(y, n_fft=4096))), x_axis='frames')
+plt.colorbar(format='%+2.0f dB')
 plt.show()
 """
