@@ -1,6 +1,7 @@
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import keras.losses
 import os, sys, getopt 
 from keras.models import Sequential, load_model
@@ -12,7 +13,7 @@ from PIL import Image
 label_dict = {"incorrect":0, "correct":1}
 
 correct_img_path = "./0727_data/training/img/stft/"
-incorrect_img_path = "./0727_data/incorrect/img/stft/"
+incorrect_img_path = ""
 correct_np_path = correct_img_path + "np/"
 incorrect_np_path = incorrect_img_path + "np/"
 
@@ -20,7 +21,7 @@ def save_data_npy(imgPath, npPath):
     file_list = os.listdir(imgPath)
 
     # Load Image, and save to npy
-    if( len(file_list)-1 == len(os.listdir(npPath))):
+    if len(file_list)-1 == len(os.listdir(npPath)):
         return;
 
     for i, filename in enumerate(file_list):
@@ -49,6 +50,7 @@ def cnn():
 
     # Getting first arrays
     X = np.load(correct_np_path + correct_labels[0])
+    print("Image Shape: ", X.shape)
     cnn_shape = X.shape[1:]
     y = np.zeros(X.shape[0])
     y[0] = label_dict["correct"]
@@ -59,18 +61,18 @@ def cnn():
         X = np.vstack((X, x))
         y = np.append(y, np.full(x.shape[0], fill_value=label_dict["correct"]))
     assert X.shape[0] == len(y)
-
-    ## Get Incorrect labels
-    save_data_npy(incorrect_img_path, incorrect_np_path)
-    incorrect_labels = os.listdir(incorrect_np_path)
-
-    # Append all of the incorrect dataset into one single array, same goes for y
-    for i, label in enumerate(incorrect_labels):
-        x = np.load(incorrect_np_path + label)
-        X = np.vstack((X, x))
-        y = np.append(y, np.full(x.shape[0], fill_value=label_dict["incorrect"]))
-    assert X.shape[0] == len(y)
-
+    print(X.shape)
+    if incorrect_img_path != "":
+        ## Get Incorrect labels
+        save_data_npy(incorrect_img_path, incorrect_np_path)
+        incorrect_labels = os.listdir(incorrect_np_path)
+        # Append all of the incorrect dataset into one single array, same goes for y
+        for i, label in enumerate(incorrect_labels):
+            x = np.load(incorrect_np_path + label)
+            X = np.vstack((X, x))
+            y = np.append(y, np.full(x.shape[0], fill_value=label_dict["incorrect"]))
+        assert X.shape[0] == len(y)
+        print(X.shape)
     # loading data
     X_train, X_test, y_label_train, y_label_test = train_test_split(X, y, test_size= (1 - 0.6), random_state=48, shuffle=True)
 
@@ -106,6 +108,8 @@ def cnn():
     model.add(Dense(128, activation='relu'))
     model.add(Dropout(0.5))
 
+    # Hidden layer
+
     # Output layer
     model.add(Dense(2, activation='softmax'))
 
@@ -133,6 +137,10 @@ def cnn():
     # show training history
     show_train_history(train_history, 'accuracy', 'val_accuracy')
     show_train_history(train_history, 'loss', 'val_loss')
+
+    # show confusion matrix
+    prediction = model.predict_classes(X_test_normalize)
+    print(pd.crosstab(y_label_test, prediction, rownames=['label'], colnames=['predict']))
 
 def main(argv):
     global correct_img_path, incorrect_img_path
