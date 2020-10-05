@@ -39,7 +39,7 @@ def show_train_history(train_history, train, validation):
     plt.title('Train History')  
     plt.ylabel(train)  
     plt.xlabel('Epoch')  
-    plt.legend(['train', 'validation'], loc='upper left')  
+    plt.legend(['train', 'validation'], loc='best')  
     plt.show()
     fig.savefig(train+".png" ,bbox_inches='tight')
 

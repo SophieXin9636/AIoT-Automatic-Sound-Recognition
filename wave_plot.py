@@ -37,9 +37,10 @@ def create_wave_pic(start, end):
 
 def wave_plot():
 	global inputfile, outputfile
-	y, sr = librosa.load(inputfile, duration=10)
+	y, sr = librosa.load(inputfile, duration=5)
 	fig = plt.figure()
 	librosa.display.waveplot(y, sr=sr)
+	plt.show()
 	plt.close('all')
 
 def main(argv):
@@ -63,7 +64,8 @@ def main(argv):
 				inputfile = arg
 			elif opt in ("-o", "--ofile"):
 				outputfile = arg
-		create_wave_pic(begin, end)
+		#create_wave_pic(begin, end)
+		wave_plot()
 
 if( __name__ == '__main__'):
 	if (sys.argv.__len__()) > 1:

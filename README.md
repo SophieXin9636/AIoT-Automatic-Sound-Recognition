@@ -80,7 +80,7 @@ Example
 python3 binary_cnn.py --correct 0727_data/training/img/stft/ --incorrect 0727_data/incorrect/img/stft/
 ```
 
-### Step4. Validation
+## Step4. Validation
 Validate a Audio file
 ```sh
 usage: python3 validation.py -i <AudioFile>
