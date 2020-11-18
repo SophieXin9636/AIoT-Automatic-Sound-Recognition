@@ -116,7 +116,7 @@ def cnn():
     print(model.summary())
 
     # Compile: choose loss function、optimize method
-    model.compile(loss=keras.losses.categorical_crossentropy,
+    model.compile(loss=keras.losses.BinaryCrossentropy(), #keras.losses.categorical_crossentropy,
                   optimizer=keras.optimizers.Adadelta(),
                   metrics=['accuracy'])
     # training
@@ -137,6 +137,14 @@ def cnn():
     # show training history
     show_train_history(train_history, 'accuracy', 'val_accuracy')
     show_train_history(train_history, 'loss', 'val_loss')
+
+    # show training history
+    print(train_history.history["accuracy"])
+    print(train_history.history["val_accuracy"])
+    print()
+    print(train_history.history["loss"])
+    print(train_history.history["val_loss"])
+    print()
 
     # show confusion matrix
     prediction = model.predict_classes(X_test_normalize)
